@@ -1,10 +1,10 @@
-import 'package:booklocker/struct/book.dart';
-import 'package:booklocker/struct/chapter.dart';
+import 'package:openreader/struct/book.dart';
+import 'package:openreader/struct/chapter.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show json;
 import 'dart:async';
-import "package:booklocker/api.dart";
+import "package:openreader/api.dart";
 
 import 'chapter.dart';
 

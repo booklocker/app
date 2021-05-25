@@ -1,10 +1,10 @@
-import 'package:booklocker/page/chapters.dart';
-import 'package:booklocker/struct/book.dart';
+import 'package:openreader/page/chapters.dart';
+import 'package:openreader/struct/book.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show json;
 import 'dart:async';
-import "package:booklocker/api.dart";
+import "package:openreader/api.dart";
 
 class BookListing extends StatelessWidget {
   final Book book;
@@ -38,25 +38,24 @@ class BookListing extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 50,
-            height: 70,
-            alignment: Alignment.center,
-            padding: EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: Colors.amber[100],
-              border: Border.all(
-                width: 1,
-                color: Colors.black,
+              width: 52,
+              height: 70,
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: Colors.amber[100],
+                border: Border.all(
+                  width: 1,
+                  color: Colors.black,
+                ),
               ),
-            ),
-            child: Text(
-              this.book.name,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 10,
-              ),
-            ),
-          ),
+              child: Text(
+                this.book.name,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 10,
+                ),
+              )),
           Container(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

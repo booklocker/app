@@ -1,4 +1,4 @@
-import 'package:booklocker/page/books.dart';
+import 'package:openreader/page/login.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -9,12 +9,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Book Locker',
+      title: 'Volt Paper',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.deepPurple,
       ),
-      home: BookList(title: 'My Books'),
+      home: LoginScreen(),
     );
   }
 }
