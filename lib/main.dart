@@ -1,113 +1,191 @@
+import 'package:booklocker/struct/book.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' show json;
+import 'dart:async';
+
+final String API_ENDPOINT = "http://192.168.0.220:10000";
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Book Locker',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: BookList(title: 'My Books'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+class BookListing extends StatelessWidget {
+  final Book book;
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+  BookListing({Key? key, required this.book}) : super(key: key);
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 50,
+            height: 70,
+            alignment: Alignment.center,
+            padding: EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: Colors.amber[100],
+              border: Border.all(
+                width: 1,
+                color: Colors.black,
+              ),
+            ),
+            child: Text(
+              this.book.name,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10,
+              ),
+            ),
+          ),
+          Container(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                this.book.name,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+              Container(height: 2),
+              Text(
+                this.book.author,
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BookList extends StatefulWidget {
+  BookList({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _BookListState createState() => _BookListState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _BookListState extends State<BookList> {
+  Future<List<Book>> fetchBooks() async {
+    final response = await http.get(Uri.parse(API_ENDPOINT + "/books")).timeout(Duration(seconds: 2));
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+    if (response.statusCode == 200) {
+      List jsonResponse = json.decode(response.body);
+      return jsonResponse.map((book) => new Book.fromJson(book)).toList();
+    } else {
+      throw Exception("Failed to load book list");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+      body: FutureBuilder<List<Book>>(
+        future: fetchBooks(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            var errMsg = snapshot.error.toString();
+            if (snapshot.error is TimeoutException) {
+              errMsg = "Couldn't connect to the server";
+            }
+
+            return Container(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Failed to fetch book list!",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Container(height: 10),
+                        Text("Error: " + errMsg),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: 50,
+                    height: 50,
+                    child: MaterialButton(
+                      color: Colors.green,
+                      textColor: Colors.white,
+                      padding: EdgeInsets.all(10),
+                      shape: CircleBorder(),
+                      onPressed: () {
+                        print("refresh");
+                        this.setState(() {});
+                      },
+                      child: Icon(
+                        Icons.refresh,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          } else if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          List<Book> books = snapshot.data!;
+
+          return ListView.separated(
+            itemCount: books.length + 2,
+            separatorBuilder: (context, index) {
+              return Divider(
+                color: Colors.black,
+                height: 2,
+              );
+            },
+            itemBuilder: (context, index) {
+              if (index < 1 || index > books.length) return Container();
+              return BookListing(
+                book: books[index - 1],
+              );
+            },
+          );
+        },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
