@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "198394113774",
+    "project_id": "openreader",
+    "storage_bucket": "openreader.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:198394113774:android:48eeb77086ff71e9b8cdff",
+        "android_client_info": {
+          "package_name": "com.raphhennessy.openreader"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "198394113774-gej2h2ksf5ovbg5c8erbrl1mp7jres0q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.raphhennessy.openreader",
+            "certificate_hash": "2ae27c2881b9257e87ba7bef7ad8cef68b58b7f5"
+          }
+        },
+        {
+          "client_id": "198394113774-2v1cn537f28rr1f12jn914kmaegvu76f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwaGZOuD2HOmXEG5F1RhLniSNEdiAcBgg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "198394113774-2v1cn537f28rr1f12jn914kmaegvu76f.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "198394113774-ulsron9eiq5nfcfna4rqfcgjgq7bk26r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.raphhennessy.openreader"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

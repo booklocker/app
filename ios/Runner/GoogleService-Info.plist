@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>198394113774-ulsron9eiq5nfcfna4rqfcgjgq7bk26r.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.198394113774-ulsron9eiq5nfcfna4rqfcgjgq7bk26r</string>
+	<key>API_KEY</key>
+	<string>AIzaSyC-RWTzxG4sqQeRQkouxBvP8SPEh0MPHx8</string>
+	<key>GCM_SENDER_ID</key>
+	<string>198394113774</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.raphhennessy.openreader</string>
+	<key>PROJECT_ID</key>
+	<string>openreader</string>
+	<key>STORAGE_BUCKET</key>
+	<string>openreader.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:198394113774:ios:5a4432da2f261333b8cdff</string>
+</dict>
+</plist>

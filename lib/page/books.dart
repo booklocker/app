@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:openreader/page/chapters.dart';
 import 'package:openreader/struct/book.dart';
 import 'package:flutter/material.dart';
@@ -83,9 +84,9 @@ class BookListing extends StatelessWidget {
 }
 
 class BookList extends StatefulWidget {
-  BookList({Key? key, required this.title}) : super(key: key);
+  BookList({Key? key, required this.user}) : super(key: key);
 
-  final String title;
+  final User user;
 
   @override
   _BookListState createState() => _BookListState();
@@ -107,7 +108,7 @@ class _BookListState extends State<BookList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text("Hi, " + (widget.user.displayName != null ? widget.user.displayName! : widget.user.email!)),
       ),
       body: FutureBuilder<List<Book>>(
         future: fetchBooks(),
