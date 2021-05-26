@@ -2,10 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:openreader/page/chapters.dart';
 import 'package:openreader/struct/book.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert' show json;
-import 'dart:async';
-import "package:openreader/api.dart";
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BookListing extends StatelessWidget {
   final Book book;
@@ -93,31 +90,17 @@ class BookList extends StatefulWidget {
 }
 
 class _BookListState extends State<BookList> {
-  Future<List<Book>> fetchBooks() async {
-    final response = await http.get(Uri.parse(API_ENDPOINT + "/books")).timeout(Duration(seconds: 2));
-
-    if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
-      return jsonResponse.map((book) => new Book.fromJson(book)).toList();
-    } else {
-      throw Exception("Failed to load book list");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Hi, " + (widget.user.displayName != null ? widget.user.displayName! : widget.user.email!)),
       ),
-      body: FutureBuilder<List<Book>>(
-        future: fetchBooks(),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection("books").snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             var errMsg = snapshot.error.toString();
-            if (snapshot.error is TimeoutException) {
-              errMsg = "Couldn't connect to the server";
-            }
 
             return Container(
               padding: EdgeInsets.all(10),
@@ -162,13 +145,13 @@ class _BookListState extends State<BookList> {
                 ],
               ),
             );
-          } else if (!snapshot.hasData) {
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: CircularProgressIndicator(),
             );
           }
 
-          List<Book> books = snapshot.data!;
+          var books = snapshot.data!.docs.asMap();
 
           return ListView.separated(
             itemCount: books.length + 2,
@@ -180,9 +163,40 @@ class _BookListState extends State<BookList> {
             },
             itemBuilder: (context, index) {
               if (index < 1 || index > books.length) return Container();
-              return BookListing(
-                book: books[index - 1],
-              );
+              var bookData = books[index - 1]!.data() as Map<String, dynamic>;
+
+              var bookName = bookData["name"];
+              var numChapters = bookData["chapters"].length;
+
+              return FutureBuilder(
+                  future: bookData["author"].get(),
+                  builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      return Container(
+                        child: Text("Failed to load details for book '" + bookName + "'"),
+                      );
+                    } else if (snapshot.connectionState == ConnectionState.waiting) {
+                      return BookListing(
+                        book: Book(
+                          id: -1,
+                          name: bookName,
+                          author: "Loading...",
+                          numChapters: numChapters,
+                        ),
+                      );
+                    }
+
+                    print(snapshot.data!.data());
+                    var author = snapshot.data!.data() as Map<String, dynamic>;
+                    return BookListing(
+                      book: Book(
+                        id: -1,
+                        name: bookName,
+                        author: author["name"],
+                        numChapters: numChapters,
+                      ),
+                    );
+                  });
             },
           );
         },
