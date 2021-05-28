@@ -1,10 +1,8 @@
 import 'package:openreader/struct/book.dart';
 import 'package:openreader/struct/chapter.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert' show json;
 import 'dart:async';
-import "package:openreader/api.dart";
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChapterView extends StatefulWidget {
   final Book book;
@@ -18,15 +16,10 @@ class ChapterView extends StatefulWidget {
 
 class _ChapterViewState extends State<ChapterView> {
   Future<Chapter> fetchChapter() async {
-    final url = API_ENDPOINT + "/chapter?book=" + widget.book.id.toString() + "&chapter=" + widget.chapter.number.toString();
-    final response = await http.get(Uri.parse(url)).timeout(Duration(seconds: 2));
+    var snapshot = await widget.chapter.reference!.get();
+    var chapterJson = snapshot.data() as Map<String, dynamic>;
 
-    if (response.statusCode == 200) {
-      var jsonResponse = json.decode(response.body);
-      return new Chapter.fromJson(jsonResponse);
-    } else {
-      throw Exception("Failed to load chapter");
-    }
+    return Chapter.fromJson(chapterJson);
   }
 
   @override

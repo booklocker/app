@@ -18,12 +18,6 @@ class Authentication {
   }
 
   static Future<AuthenticationResult> signUpWithEmail({required String email, required String password}) async {
-    if (email == "") {
-      return AuthenticationResult(error: "An email address is required");
-    } else if (password == "") {
-      return AuthenticationResult(error: "Your password cannot be left empty");
-    }
-
     FirebaseAuth auth = FirebaseAuth.instance;
 
     try {
@@ -40,12 +34,6 @@ class Authentication {
   }
 
   static Future<AuthenticationResult> signInWithEmail({required String email, required String password}) async {
-    if (email == "") {
-      return AuthenticationResult(error: "An email address is required");
-    } else if (password == "") {
-      return AuthenticationResult(error: "Your password cannot be left empty");
-    }
-
     FirebaseAuth auth = FirebaseAuth.instance;
 
     try {

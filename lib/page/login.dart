@@ -16,11 +16,13 @@ class _LoginScrenState extends State<LoginScreen> {
   var _hasAccount = false;
   var _googleSignInLoading = false;
   var _mainButtonLoading = false;
-  String? _signInError = null;
+  String? _signInError;
 
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
   late Future<FirebaseApp> _firebaseFuture;
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -49,20 +51,35 @@ class _LoginScrenState extends State<LoginScreen> {
     );
   }
 
-  void _logInOrCreateAccount(BuildContext context) async {
+  void _logInOrCreateAccount(BuildContext context, {ignoreBasicErrors = false}) async {
     if (_mainButtonLoading || _googleSignInLoading) return;
+
+    var email = _emailController.value.text;
+    var password = _passwordController.value.text;
+
+    var emailEmpty = email == "";
+    var passwordEmpty = password == "";
+
+
+    if (ignoreBasicErrors && (emailEmpty || passwordEmpty)) {
+      setState(() {
+        _mainButtonLoading = false;
+      });
+      return;
+    }
 
     setState(() {
       _mainButtonLoading = true;
       _signInError = null;
     });
 
-    var email = _emailController.value.text;
-    var password = _passwordController.value.text;
-
     AuthenticationResult res;
 
-    if (_hasAccount)
+    if (emailEmpty) {
+      res = AuthenticationResult(error: "An email address is required");
+    } else if (passwordEmpty) {
+      res = AuthenticationResult(error: "Your password cannot be left empty");
+    } else if (_hasAccount)
       res = await Authentication.signInWithEmail(email: email, password: password);
     else
       res = await Authentication.signUpWithEmail(email: email, password: password);
@@ -179,179 +196,186 @@ class _LoginScrenState extends State<LoginScreen> {
                           SizedBox(height: MediaQuery.of(context).padding.top + 40),
                           Container(
                             padding: EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 3),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Voltpaper",
-                                        style: TextStyle(
-                                          fontSize: 35,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 3),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Voltpaper",
+                                          style: TextStyle(
+                                            fontSize: 35,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
                                         ),
+                                        Container(height: 5),
+                                        _signInError == null
+                                            ? Text(
+                                                _hasAccount ? "Enter your email and password below to access your bookshelf" : "Create a free account below to start reading",
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            : Text(
+                                                _signInError!,
+                                                style: TextStyle(
+                                                  color: Colors.amber,
+                                                  fontSize: 20,
+                                                ),
+                                              ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(height: 30),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 3),
+                                    child: Text(
+                                      "Email",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.white,
                                       ),
-                                      Container(height: 5),
-                                      _signInError == null
-                                          ? Text(
-                                              _hasAccount ? "Enter your email and password below to access your bookshelf" : "Create a free account below to start reading",
+                                    ),
+                                  ),
+                                  Container(height: 2),
+                                  Container(
+                                    child: TextFormField(
+                                      controller: _emailController,
+                                      autofillHints: [AutofillHints.email, AutofillHints.username],
+                                      keyboardType: TextInputType.emailAddress,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.white,
+                                            width: 2,
+                                          ),
+                                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(height: 10),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 3),
+                                    child: Text(
+                                      "Password",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(height: 2),
+                                  Container(
+                                    child: TextFormField(
+                                      controller: _passwordController,
+                                      obscureText: true,
+                                      onFieldSubmitted: (_) => _logInOrCreateAccount(context, ignoreBasicErrors: true),
+                                      autofillHints: [AutofillHints.password],
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.white,
+                                            width: 2,
+                                          ),
+                                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(height: 20),
+                                  _mainButtonLoading
+                                      ? Container(
+                                          height: 50,
+                                          alignment: Alignment.center,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.lightGreen,
+                                          ),
+                                        )
+                                      : GradientButton(
+                                          onPressed: () => _logInOrCreateAccount(context),
+                                          colors: [Colors.green, Colors.lightGreen],
+                                          child: Center(
+                                            child: Text(
+                                              _hasAccount ? "Log In" : "Create Account",
                                               style: TextStyle(
                                                 fontSize: 20,
                                                 color: Colors.white,
                                               ),
-                                            )
-                                          : Text(
-                                              _signInError!,
-                                              style: TextStyle(
-                                                color: Colors.amber,
-                                                fontSize: 20,
-                                              ),
                                             ),
-                                    ],
-                                  ),
-                                ),
-                                Container(height: 30),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 3),
-                                  child: Text(
-                                    "Email",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                Container(height: 2),
-                                Container(
-                                  child: TextField(
-                                    controller: _emailController,
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Colors.white,
-                                          width: 2,
+                                          ),
                                         ),
-                                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                                      ),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 18),
-                                    ),
-                                  ),
-                                ),
-                                Container(height: 10),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 3),
-                                  child: Text(
-                                    "Password",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                Container(height: 2),
-                                Container(
-                                  child: TextField(
-                                    controller: _passwordController,
-                                    obscureText: true,
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Colors.white,
-                                          width: 2,
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 15),
+                                    child: Row(
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: Divider(
+                                            thickness: 1,
+                                            height: 20,
+                                            color: Colors.white.withOpacity(0.7),
+                                          ),
                                         ),
-                                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                                      ),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 18),
-                                    ),
-                                  ),
-                                ),
-                                Container(height: 20),
-                                _mainButtonLoading
-                                    ? Container(
-                                        height: 50,
-                                        alignment: Alignment.center,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.lightGreen,
-                                        ),
-                                      )
-                                    : GradientButton(
-                                        onPressed: () => _logInOrCreateAccount(context),
-                                        colors: [Colors.green, Colors.lightGreen],
-                                        child: Center(
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 5),
                                           child: Text(
-                                            _hasAccount ? "Log In" : "Create Account",
+                                            "OR",
                                             style: TextStyle(
-                                              fontSize: 20,
-                                              color: Colors.white,
+                                              fontFamily: "Roboto",
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 15.0,
+                                              color: Colors.white.withOpacity(0.8),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 15),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Expanded(
-                                        child: Divider(
-                                          thickness: 1,
-                                          height: 20,
-                                          color: Colors.white.withOpacity(0.7),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 5),
-                                        child: Text(
-                                          "OR",
-                                          style: TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 15.0,
-                                            color: Colors.white.withOpacity(0.8),
+                                        Expanded(
+                                          child: Divider(
+                                            thickness: 1,
+                                            color: Colors.white.withOpacity(0.7),
                                           ),
                                         ),
-                                      ),
-                                      Expanded(
-                                        child: Divider(
-                                          thickness: 1,
-                                          color: Colors.white.withOpacity(0.7),
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                _googleSignInLoading
-                                    ? Container(
-                                        height: 50,
-                                        alignment: Alignment.center,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
+                                  _googleSignInLoading
+                                      ? Container(
+                                          height: 50,
+                                          alignment: Alignment.center,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : GradientButton(
+                                          onPressed: () => _signInWithGoogle(context),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: <Widget>[
+                                              Image.asset(
+                                                "assets/images/google-logo.png",
+                                                width: 25,
+                                                height: 25,
+                                              ),
+                                              SizedBox(width: 24),
+                                              Text("Sign in with Google"),
+                                            ],
+                                          ),
                                         ),
-                                      )
-                                    : GradientButton(
-                                        onPressed: () => _signInWithGoogle(context),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: <Widget>[
-                                            Image.asset(
-                                              "assets/images/google-logo.png",
-                                              width: 25,
-                                              height: 25,
-                                            ),
-                                            SizedBox(width: 24),
-                                            Text("Sign in with Google"),
-                                          ],
-                                        ),
-                                      ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                           SizedBox(height: 20),
@@ -373,11 +397,11 @@ class _LoginScrenState extends State<LoginScreen> {
                               TextButton(
                                 style: TextButton.styleFrom(
                                   backgroundColor: Colors.black.withOpacity(0.1),
-                                  padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
                                 ),
                                 onPressed: _switchLoginMode,
                                 child: Container(
                                   alignment: Alignment.center,
+                                  padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
                                   child: RichText(
                                     text: TextSpan(
                                       text: _hasAccount ? "Don't have an account? " : "Already have an account? ",

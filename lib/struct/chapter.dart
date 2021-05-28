@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class TextSnippet {
   final String text;
   final String? style;
@@ -28,16 +30,19 @@ class Paragraph {
 class Chapter {
   final int number;
   final String name;
+
+  final DocumentReference? reference;
   final List<Paragraph>? contents;
 
-  Chapter({required this.number, required this.name, this.contents});
+  Chapter({required this.number, required this.name, this.reference, this.contents});
 
   factory Chapter.fromJson(Map<String, dynamic> json) {
     List<Paragraph> contents = [];
 
     if (json.containsKey("contents")) {
       for (var paragraph in json["contents"]) {
-        contents.add(Paragraph.fromJson(paragraph));
+        var textSnippets = paragraph["contents"] as List<dynamic>;
+        contents.add(Paragraph.fromJson(textSnippets));
       }
     }
 

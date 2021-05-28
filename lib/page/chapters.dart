@@ -1,10 +1,7 @@
 import 'package:openreader/struct/book.dart';
 import 'package:openreader/struct/chapter.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert' show json;
 import 'dart:async';
-import "package:openreader/api.dart";
 
 import 'chapter.dart';
 
@@ -17,7 +14,7 @@ class ChapterListing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatButton(
-      padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
+      padding: EdgeInsets.zero,
       onPressed: () {
         Navigator.push(
           context,
@@ -40,24 +37,27 @@ class ChapterListing extends StatelessWidget {
           ),
         );
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Chapter " + this.chapter.number.toString(),
-            style: TextStyle(
-              fontSize: 16,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Chapter " + this.chapter.number.toString(),
+              style: TextStyle(
+                fontSize: 16,
+              ),
             ),
-          ),
-          Container(height: 5),
-          Text(
-            this.chapter.name,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+            Container(height: 5),
+            Text(
+              this.chapter.name,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -74,14 +74,18 @@ class ChapterList extends StatefulWidget {
 
 class _ChapterListState extends State<ChapterList> {
   Future<List<Chapter>> fetchChapters() async {
-    final response = await http.get(Uri.parse(API_ENDPOINT + "/chapters?book=" + widget.book.id.toString())).timeout(Duration(seconds: 2));
+    // TODO: don't fetch chapter list when initially fetching book, and fetch it here instead ?
+    List<Chapter> chapters = [];
 
-    if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
-      return jsonResponse.map((chapter) => new Chapter.fromJson(chapter)).toList();
-    } else {
-      throw Exception("Failed to load book list");
+    for (var chapter in widget.book.chapters) {
+      chapters.add(Chapter(
+        number: chapter["number"],
+        name: chapter["name"],
+        reference: chapter["ref"],
+      ));
     }
+
+    return chapters;
   }
 
   @override

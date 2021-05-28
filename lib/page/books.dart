@@ -12,7 +12,7 @@ class BookListing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatButton(
-      padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
+      padding: EdgeInsets.zero,
       onPressed: () {
         Navigator.push(
           context,
@@ -32,49 +32,52 @@ class BookListing extends StatelessWidget {
           ),
         );
       },
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-              width: 52,
-              height: 70,
-              alignment: Alignment.center,
-              padding: EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: Colors.amber[100],
-                border: Border.all(
-                  width: 1,
-                  color: Colors.black,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+                width: 52,
+                height: 70,
+                alignment: Alignment.center,
+                padding: EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.amber[100],
+                  border: Border.all(
+                    width: 1,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-              child: Text(
-                this.book.name,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 10,
+                child: Text(
+                  this.book.name,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 10,
+                  ),
+                )),
+            Container(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  this.book.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
                 ),
-              )),
-          Container(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                this.book.name,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                Container(height: 2),
+                Text(
+                  this.book.author,
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
                 ),
-              ),
-              Container(height: 2),
-              Text(
-                this.book.author,
-                style: TextStyle(
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -166,37 +169,37 @@ class _BookListState extends State<BookList> {
               var bookData = books[index - 1]!.data() as Map<String, dynamic>;
 
               var bookName = bookData["name"];
-              var numChapters = bookData["chapters"].length;
+              var chapterList = bookData["chapters"] as List<dynamic>;
 
               return FutureBuilder(
-                  future: bookData["author"].get(),
-                  builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-                    if (snapshot.hasError) {
-                      return Container(
-                        child: Text("Failed to load details for book '" + bookName + "'"),
-                      );
-                    } else if (snapshot.connectionState == ConnectionState.waiting) {
-                      return BookListing(
-                        book: Book(
-                          id: -1,
-                          name: bookName,
-                          author: "Loading...",
-                          numChapters: numChapters,
-                        ),
-                      );
-                    }
-
-                    print(snapshot.data!.data());
-                    var author = snapshot.data!.data() as Map<String, dynamic>;
+                future: bookData["author"].get(),
+                builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return Container(
+                      child: Text("Failed to load details for book '" + bookName + "'"),
+                    );
+                  } else if (snapshot.connectionState == ConnectionState.waiting) {
                     return BookListing(
                       book: Book(
                         id: -1,
                         name: bookName,
-                        author: author["name"],
-                        numChapters: numChapters,
+                        author: "Loading...",
+                        chapters: chapterList,
                       ),
                     );
-                  });
+                  }
+
+                  var author = snapshot.data!.data() as Map<String, dynamic>;
+                  return BookListing(
+                    book: Book(
+                      id: -1,
+                      name: bookName,
+                      author: author["name"],
+                      chapters: chapterList,
+                    ),
+                  );
+                },
+              );
             },
           );
         },
