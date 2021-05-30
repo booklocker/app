@@ -1,4 +1,4 @@
-package com.raphhennessy.app;
+package com.raphhennessy.openreader;
 
 import io.flutter.embedding.android.FlutterActivity;
 

@@ -189,9 +189,11 @@ class _LoginScrenState extends State<LoginScreen> {
                           ),
                         );
                       } else if (snapshot.connectionState != ConnectionState.done || FirebaseAuth.instance.currentUser != null) {
-                        return CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.green,
+                        return Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.green,
+                            ),
                           ),
                         );
                       }

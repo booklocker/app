@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.raphhennessy.app">
+    package="com.raphhennessy.openreader">
    <application
-        android:label="app"
+        android:label="Voltpaper"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
