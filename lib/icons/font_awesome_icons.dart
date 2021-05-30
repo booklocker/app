@@ -21,6 +21,7 @@ class FontAwesome {
   static const _kFontFam = 'FontAwesome';
   static const String? _kFontPkg = null;
 
+  static const IconData ellipsis_h_regular = IconData(0xe804, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData eye_solid = IconData(0xe805, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData eye_slash_solid = IconData(0xe806, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }

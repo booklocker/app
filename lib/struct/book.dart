@@ -1,5 +1,5 @@
 class Book {
-  final int id;
+  final String id;
   final String name;
   final String author;
 

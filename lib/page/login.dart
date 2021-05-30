@@ -31,6 +31,14 @@ class _LoginScrenState extends State<LoginScreen> {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _firebaseFuture = Authentication.initializeFirebase();
+
+    _firebaseFuture.then((firebase) {
+      var user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        _finishLogin(context, user);
+      }
+    });
   }
 
   void _switchLoginMode() {
@@ -46,7 +54,7 @@ class _LoginScrenState extends State<LoginScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => new BookList(user: user),
+        builder: (context) => new BookListScreen(user: user),
       ),
     );
   }
@@ -59,7 +67,6 @@ class _LoginScrenState extends State<LoginScreen> {
 
     var emailEmpty = email == "";
     var passwordEmpty = password == "";
-
 
     if (ignoreBasicErrors && (emailEmpty || passwordEmpty)) {
       setState(() {
@@ -181,7 +188,7 @@ class _LoginScrenState extends State<LoginScreen> {
                             ],
                           ),
                         );
-                      } else if (snapshot.connectionState != ConnectionState.done) {
+                      } else if (snapshot.connectionState != ConnectionState.done || FirebaseAuth.instance.currentUser != null) {
                         return CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(
                             Colors.green,
@@ -308,7 +315,9 @@ class _LoginScrenState extends State<LoginScreen> {
                                       : GradientButton(
                                           onPressed: () => _logInOrCreateAccount(context),
                                           colors: [Colors.green, Colors.lightGreen],
-                                          child: Center(
+                                          child: Container(
+                                            height: 50,
+                                            alignment: Alignment.center,
                                             child: Text(
                                               _hasAccount ? "Log In" : "Create Account",
                                               style: TextStyle(
@@ -360,18 +369,22 @@ class _LoginScrenState extends State<LoginScreen> {
                                         )
                                       : GradientButton(
                                           onPressed: () => _signInWithGoogle(context),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: <Widget>[
-                                              Image.asset(
-                                                "assets/images/google-logo.png",
-                                                width: 25,
-                                                height: 25,
-                                              ),
-                                              SizedBox(width: 24),
-                                              Text("Sign in with Google"),
-                                            ],
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            height: 50,
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: <Widget>[
+                                                Image.asset(
+                                                  "assets/images/google-logo.png",
+                                                  width: 25,
+                                                  height: 25,
+                                                ),
+                                                SizedBox(width: 24),
+                                                Text("Sign in with Google"),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                 ],
@@ -380,23 +393,33 @@ class _LoginScrenState extends State<LoginScreen> {
                           ),
                           SizedBox(height: 20),
                           Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
-                              Padding(
+                              Container(
+                                alignment: Alignment.center,
+                                width: double.infinity,
                                 padding: EdgeInsets.all(15),
                                 child: RichText(
-                                  text: TextSpan(text: "By ${_hasAccount ? "logging in" : "signing up"}, you agree to our ", children: <TextSpan>[
-                                    TextSpan(
-                                      text: "Terms & Conditions",
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                  text: TextSpan(
+                                    text: "By ${_hasAccount ? "logging in" : "signing up"}, you agree to our ",
+                                    style: TextStyle(
+                                      color: Colors.white,
                                     ),
-                                    TextSpan(text: "."),
-                                  ]),
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text: "Terms & Conditions",
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(text: "."),
+                                    ],
+                                  ),
                                 ),
                               ),
                               Divider(height: 1, color: Colors.white.withOpacity(0.7)),
                               TextButton(
                                 style: TextButton.styleFrom(
                                   backgroundColor: Colors.black.withOpacity(0.1),
+                                  primary: Colors.white
                                 ),
                                 onPressed: _switchLoginMode,
                                 child: Container(
@@ -405,6 +428,9 @@ class _LoginScrenState extends State<LoginScreen> {
                                   child: RichText(
                                     text: TextSpan(
                                       text: _hasAccount ? "Don't have an account? " : "Already have an account? ",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
                                       children: <TextSpan>[
                                         TextSpan(
                                           text: _hasAccount ? "Sign up" : "Log in",

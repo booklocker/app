@@ -108,7 +108,7 @@ class Authentication {
     return AuthenticationResult(error: "An unexpected error occurred. Please try again");
   }
 
-  static Future<void> signOut({required BuildContext context}) async {
+  static Future<void> signOut() async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
 
     try {
