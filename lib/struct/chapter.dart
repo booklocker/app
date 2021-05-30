@@ -27,16 +27,12 @@ class Paragraph {
   }
 }
 
-class Chapter {
-  final int number;
-  final String name;
-
-  final DocumentReference? reference;
+class ReadableChapter extends Chapter {
   final List<Paragraph>? contents;
 
-  Chapter({required this.number, required this.name, this.reference, this.contents});
+  ReadableChapter({required number, required name, required reference, required this.contents}) : super(number: number, name: name, reference: reference);
 
-  factory Chapter.fromJson(Map<String, dynamic> json) {
+  factory ReadableChapter.fromJson(DocumentReference reference, Map<String, dynamic> json) {
     List<Paragraph> contents = [];
 
     if (json.containsKey("contents")) {
@@ -46,6 +42,14 @@ class Chapter {
       }
     }
 
-    return Chapter(number: json["number"], name: json["name"], contents: contents);
+    return ReadableChapter(number: json["number"], name: json["name"], contents: contents, reference: reference);
   }
+}
+
+class Chapter {
+  final int number;
+  final String name;
+  final DocumentReference reference;
+
+  Chapter({required this.number, required this.name, required this.reference});
 }

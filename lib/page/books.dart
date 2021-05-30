@@ -29,21 +29,22 @@ class BookListScreen extends StatelessWidget {
 
   void _openMenu(context) {
     showDialog(
-        context: context,
-        builder: (context) {
-          return SimpleDialog(
-            title: Text("Menu"),
-            children: [
-              SimpleDialogOption(
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 5),
-                  child: Text("Log Out"),
-                ),
-                onPressed: () => _logOut(context),
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: Text("Menu"),
+          children: [
+            SimpleDialogOption(
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 5),
+                child: Text("Log Out"),
               ),
-            ],
-          );
-        });
+              onPressed: () => _logOut(context),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -146,43 +147,39 @@ class _BookListState extends State<BookList> {
   DocumentSnapshot? _lastVisibleBook;
 
   Future<List<Book>> _fetchBooks() async {
-    final completer = Completer<List<Book>>();
     var query = FirebaseFirestore.instance.collection("books").orderBy("name").limit(10);
     if (_lastVisibleBook != null) query = query.startAfterDocument(_lastVisibleBook!);
 
-    query.snapshots().listen((snapshot) async {
-      List<Book> newBooks = [];
+    var snapshot = await query.get();
+    List<Book> newBooks = [];
 
-      for (var bookDoc in snapshot.docs) {
-        var bookData = bookDoc.data();
-        String bookName = bookData["name"];
+    for (var bookDoc in snapshot.docs) {
+      var bookData = bookDoc.data();
+      String bookName = bookData["name"];
 
-        DocumentSnapshot authorData = await bookData["author"].get();
-        String authorName = authorData["name"];
+      DocumentSnapshot authorData = await bookData["author"].get();
+      String authorName = authorData["name"];
 
-        newBooks.add(Book(
-          id: bookDoc.id,
-          name: bookName,
-          author: authorName,
-          chapters: [],
-        ));
-      }
+      newBooks.add(Book(
+        ref: bookDoc.reference,
+        name: bookName,
+        author: authorName,
+        chapters: [],
+      ));
+    }
 
-      if (snapshot.docs.length == 0) {
-        print("Out of books!");
-        this.setState(() {
-          _outOfBooks = true;
-        });
-      } else {
-        this.setState(() {
-          _lastVisibleBook = snapshot.docs[snapshot.docs.length - 1];
-        });
-      }
+    if (snapshot.docs.length == 0) {
+      print("Out of books!");
+      if (mounted) this.setState(() {
+        _outOfBooks = true;
+      });
+    } else {
+      if (mounted) this.setState(() {
+        _lastVisibleBook = snapshot.docs[snapshot.docs.length - 1];
+      });
+    }
 
-      completer.complete(newBooks);
-    });
-
-    return completer.future;
+    return newBooks;
   }
 
   void _fetchMoreBooks() {
@@ -191,12 +188,12 @@ class _BookListState extends State<BookList> {
     });
     print("Fetching books...");
     _fetchBooks().then((newBooks) {
-      setState(() {
+      if (mounted) setState(() {
         _currentlyFetching = false;
         _books.addAll(newBooks);
       });
     }).catchError((error) {
-      setState(() {
+      if (mounted) setState(() {
         _currentlyFetching = false;
         _fetchError = error;
       });
@@ -312,7 +309,7 @@ class BookListing extends StatelessWidget {
           Navigator.push(
             context,
             PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => ChapterList(book: this.book),
+              pageBuilder: (context, animation, secondaryAnimation) => ChapterListScreen(book: this.book),
               transitionsBuilder: (context, animation, secondaryAnimation, child) {
                 var begin = Offset(1, 0);
                 var end = Offset.zero;

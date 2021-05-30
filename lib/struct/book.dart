@@ -1,18 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Book {
-  final String id;
+  final DocumentReference ref;
   final String name;
   final String author;
-
   final List<dynamic> chapters;
 
-  Book({required this.id, required this.name, required this.author, required this.chapters});
-
-  factory Book.fromJson(Map<String, dynamic> json) {
-    return Book(
-      id: json["id"],
-      name: json["name"],
-      author: json["author"],
-      chapters: json["chapters"],
-    );
-  }
+  Book({required this.ref, required this.name, required this.author, required this.chapters});
 }
